@@ -17,6 +17,7 @@ builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 app.UseExceptionMiddleware();
@@ -40,6 +41,7 @@ app.UseStaticFiles(new StaticFileOptions()
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Content")),
     RequestPath = "/Content"
 });
+
 app.UseAuthentication();
 app.UseAuthorization();
 
