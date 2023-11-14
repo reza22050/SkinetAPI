@@ -94,10 +94,11 @@ namespace API.Controllers
 
         }
 
-        [HttpGet("emailiexists")]
+        [HttpGet("emailexists")]
         public async Task<ActionResult<bool>> CheckEmailExistsAsync([FromQuery] string email)
         {
-            return await _userManager.Users.FirstAsync(x => x.UserName == email)  != null;
+            var result = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == email) != null;
+            return result;
         }
 
         [Authorize]
