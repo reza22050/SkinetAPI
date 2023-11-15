@@ -1,6 +1,9 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Core.Entities;
+using Core.Entities.OrderAggregate;
+using Infrastructure.Data.Config;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -15,6 +18,10 @@ namespace Infrastructue.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductBrand> ProductBrands { get; set; }
         public DbSet<ProductType> ProductTypes { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
+
        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,6 +48,10 @@ namespace Infrastructue.Data
 
             }
 
+            modelBuilder.ApplyConfiguration(new DeliveryMethodConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductConfiguration());
         }
 
         private void SeedData(ModelBuilder modelBuilder)
@@ -53,6 +64,9 @@ namespace Infrastructue.Data
             
             var lstProducts = JsonConvert.DeserializeObject<List<Product>>(ReadJsonFile("products"));
             modelBuilder.Entity<Product>().HasData(lstProducts);
+
+            var lstDeliveryMethods = JsonConvert.DeserializeObject<List<DeliveryMethod>>(ReadJsonFile("delivery"));
+            modelBuilder.Entity<DeliveryMethod>().HasData(lstDeliveryMethods);
         }
 
         private string ReadJsonFile(string fileName)
