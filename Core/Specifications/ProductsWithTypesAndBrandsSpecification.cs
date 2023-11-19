@@ -5,29 +5,30 @@ namespace Core.Specifications
     public class ProductsWithTypesAndBrandsSpecification : BaseSpecification<Product>
     {
         public ProductsWithTypesAndBrandsSpecification(ProductSpecParams productParams)
-            : base(x=>
-                  (string.IsNullOrEmpty(productParams.Search) || x.Name.ToLower().Contains(productParams.Search)) && 
-                  (!productParams.BrandId.HasValue || x.ProductTypeId== productParams.BrandId) &&
-                  (!productParams.TypeId.HasValue || x.ProductTypeId == productParams.TypeId)
+            : base(x =>
+            (string.IsNullOrEmpty(productParams.Search) || x.Name.ToLower().Contains(productParams.Search)) &&
+            (!productParams.BrandId.HasValue || x.ProductBrandId == productParams.BrandId) &&
+            (!productParams.TypeId.HasValue || x.ProductTypeId == productParams.TypeId)
             )
         {
             AddInclude(x => x.ProductType);
             AddInclude(x => x.ProductBrand);
             AddOrderBy(x => x.Name);
-            ApplyPaging(productParams.PageSize * (productParams.PageIndex - 1), productParams.PageSize);
+            ApplyPaging(productParams.PageSize * (productParams.PageIndex - 1),
+                productParams.PageSize);
 
-            if(!string.IsNullOrEmpty(productParams.Sort))
+            if (!string.IsNullOrEmpty(productParams.Sort))
             {
-                switch (productParams.Sort.ToLower())
+                switch (productParams.Sort)
                 {
-                    case "priceasc":
-                        AddOrderBy(x=>x.Price); 
+                    case "priceAsc":
+                        AddOrderBy(p => p.Price);
                         break;
-                    case "pricedesc":
-                        AddOrderByDescending(x=>x.Price);
+                    case "priceDesc":
+                        AddOrderByDescending(p => p.Price);
                         break;
                     default:
-                        AddOrderBy(x => x.Name);
+                        AddOrderBy(n => n.Name);
                         break;
                 }
             }
