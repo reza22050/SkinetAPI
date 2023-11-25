@@ -27,6 +27,17 @@
 
   <ItemGroup>
     <Content Include="Content\**" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="wwwroot\187.3f89f8dda6e8a837.js" />
+    <None Include="wwwroot\207.94788854e2426271.js" />
+    <None Include="wwwroot\333.d3c995fcef704013.js" />
+    <None Include="wwwroot\481.9a797fbd8f5fd2a9.js" />
+    <None Include="wwwroot\920.1882ac29d9f06436.js" />
+    <None Include="wwwroot\common.bd884877f7f0ba29.js" />
+    <None Include="wwwroot\fontawesome-webfont.da909aa098b0ee2d.svg" />
+    <None Include="wwwroot\fontawesome-webfont.e9955780856cf8aa.woff2" />
+    <None Include="wwwroot\main.5a96f0f8b6a1e6e1.js" />
+    <None Include="wwwroot\polyfills.f91a65f870354b2e.js" />
+    <None Include="wwwroot\runtime.1a36a8c8176a89a5.js" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 

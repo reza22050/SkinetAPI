@@ -1,4 +1,4 @@
-﻿using API.Dtos;
+using API.Dtos;
 using AutoMapper;
 using Core.Entities.OrderAggregate;
 
@@ -6,20 +6,21 @@ namespace API.Helpers
 {
     public class OrderItemUrlResolver : IValueResolver<OrderItem, OrderItemDto, string>
     {
-        private readonly IConfiguration config;
-
+        private readonly IConfiguration _config;
         public OrderItemUrlResolver(IConfiguration config)
         {
-            this.config = config;
+            _config = config;
         }
+
         public string Resolve(OrderItem source, OrderItemDto destination, string destMember, ResolutionContext context)
         {
-           if(string.IsNullOrEmpty(source.ItemOrdered.PictureUrl))
+            if (!string.IsNullOrEmpty(source.ItemOrdered.PictureUrl))
             {
-                return config["ApiUrl"] + source.ItemOrdered.PictureUrl;
+                return _config["ApiUrl"] + source.ItemOrdered.PictureUrl;
             }
-            return null;
 
+            return null;
         }
     }
+
 }

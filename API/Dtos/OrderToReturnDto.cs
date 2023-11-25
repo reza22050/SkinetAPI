@@ -1,4 +1,4 @@
-﻿using Core.Entities.OrderAggregate;
+using Core.Entities.OrderAggregate;
 
 namespace API.Dtos
 {
@@ -12,7 +12,7 @@ namespace API.Dtos
         public decimal ShippingPrice { get; set; }
         public IReadOnlyList<OrderItemDto> OrderItems { get; set; }
         public decimal Subtotal { get; set; }
-        public decimal Total { get; set; }  
-        public string Status { get; set; } 
+        public decimal Total { get; set; }
+        public string Status { get; set; }
     }
 }

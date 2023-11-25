@@ -1,52 +1,45 @@
-﻿using API.Errors;
+using API.Errors;
 using Core.Interfaces;
 using Infrastructue.Data;
 using Infrastructure.Data;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using System.Reflection.Metadata.Ecma335;
 
 namespace API.Extensions
 {
     public static class ApplicationServicesExtensions
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services,
+            IConfiguration config)
         {
-            #region Services
-
+            services.AddSingleton<IResponseCacheService, ResponseCacheService>();
             services.AddDbContext<StoreContext>(opt =>
             {
-                opt.UseSqlServer(config.GetConnectionString("DefaultConnection"));
+                opt.UseNpgsql(config.GetConnectionString("DefaultConnection"));
             });
-
-            services.AddSingleton<IConnectionMultiplexer>(c =>
+            services.AddSingleton<IConnectionMultiplexer>(c => 
             {
-                var option = ConfigurationOptions.Parse(config.GetConnectionString("Redis"));
-                return ConnectionMultiplexer.Connect(option);
+                var options = ConfigurationOptions.Parse(config.GetConnectionString("Redis"));
+                return ConnectionMultiplexer.Connect(options);
             });
-
-            services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IBasketRepository, BasketRepository>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-
-            #endregion
-
             services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.InvalidModelStateResponseFactory = actionContext =>
                 {
-                    var errors = actionContext.ModelState.Where(x => x.Value.Errors.Count > 0)
-                    .SelectMany(x => x.Value.Errors)
-                    .Select(x => x.ErrorMessage)
-                    .ToList();
+                    var errors = actionContext.ModelState
+                        .Where(e => e.Value.Errors.Count > 0)
+                        .SelectMany(x => x.Value.Errors)
+                        .Select(x => x.ErrorMessage).ToArray();
 
                     var errorResponse = new ApiValidationErrorResponse
                     {
@@ -59,17 +52,13 @@ namespace API.Extensions
 
             services.AddCors(opt =>
             {
-                opt.AddPolicy("CorsPolicy", policy =>
+                opt.AddPolicy("CorsPolicy", policy => 
                 {
-                    policy.WithOrigins("https://localhost:4200")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200");
                 });
             });
 
             return services;
         }
-
     }
 }
