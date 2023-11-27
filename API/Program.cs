@@ -1,64 +1,63 @@
-using API.Errors;
 using API.Extensions;
 using API.Middleware;
-using Core.Interfaces;
+using Core.Entities.Identity;
 using Infrastructue.Data;
 using Infrastructure.Data;
-using Microsoft.AspNetCore.Builder;
+using Infrastructure.Data.Identity;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddControllers();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddSwaggerDocumentation();
 
 var app = builder.Build();
-app.UseExceptionMiddleware();
 
 // Configure the HTTP request pipeline.
-app.UseStatusCodePagesWithReExecute("/error/{0}");
+app.UseMiddleware<ExceptionMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwaggerDocumentation();
-}
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
-app.UseCors("CorsPolicy");
-
-app.UseHttpsRedirection();
+app.UseSwaggerDocumentation();
 
 app.UseStaticFiles();
-app.UseStaticFiles(new StaticFileOptions()
+app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Content")),
-    RequestPath = "/Content"
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Content")), RequestPath = "/Content"
 });
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapFallbackToController("Index", "Fallback");
 
-//using var scope = app.Services.CreateScope();
-//var services = scope.ServiceProvider;
-//var context = services.GetRequiredService<StoreContext>();
-//var logger = services.GetRequiredService<ILogger<Program>>();
-//try
-//{
-//    await context.Database.MigrateAsync();
-//    await StoreContextSeed.SeedAsync(context);
-//}
-//catch (Exception ex)
-//{
-//    logger.LogError(ex, "An error occured during migration");
-//}
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var context = services.GetRequiredService<StoreContext>();
+var identityContext = services.GetRequiredService<AppIdentityDbContext>();
+var userManager = services.GetRequiredService<UserManager<AppUser>>();
+var logger = services.GetRequiredService<ILogger<Program>>();
+try
+{
+    await context.Database.MigrateAsync();
+    await identityContext.Database.MigrateAsync();
+    await StoreContextSeed.SeedAsync(context);
+    await AppIdentityDbContextSeed.SeedUsersAsync(userManager);
+}
+catch (Exception ex)
+{
+    logger.LogError(ex, "An error occured during migration");
+}
 
 app.Run();
